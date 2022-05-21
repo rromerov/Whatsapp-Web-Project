@@ -1,13 +1,13 @@
-// libreria para usar whatsapp web
+// library to use whatsapp web
 const { Client, LocalAuth } = require('whatsapp-web.js');
 
-// libreria para usar prompts dentro de simbolo de sistema
+// library to use prompt inside console
 const prompt = require('prompt-sync')();
 
-// libreria para generar codigo qr
+// library to generate qr corde
 const qrcode = require('qrcode-terminal');
 
-// libreria para generar archivo .txt 
+// library to create a .txt file
 var fs = require('fs');
 var logger = fs.createWriteStream('Response.txt', {
     flags: 'a' // 'a' means appending (old data will be preserved)
@@ -16,51 +16,49 @@ var logger = fs.createWriteStream('Response.txt', {
 let number=prompt("Número del contacto: ");
 const text = prompt("Mensaje a enviar: ");
 
-// Dar de alta clientes
+
 const client = new Client({
     authStrategy: new LocalAuth()
 });
 
-// Notificar si hay un error al momento de restaurar una sesión
+// Notify if there's an error in the authentication process
 client.on('auth_failure', msg => {
-    console.error('Restauración de la sesión sin éxito, borrar carpeta .wwebjs_auth', msg);
+    console.error('Authentication failure', msg);
 });
 
 
-//Generar código qr
 client.on('qr', (qr) => {
     qrcode.generate(qr, {small: true});
   });
 
   client.on('ready', () => {
-    console.log('Mensaje enviado');
+    console.log('Message sent');
    
-    // Delay para mandar mensaje después de 10 segundos
-    setTimeout(()=>{
-     // Mandar mensaje si el número ingresado es correcto        
+    
+    setTimeout(()=>{     
           const chatId =+"521" +number+"@c.us";
-            // Mandar mensaje
+            // Send message
             client.sendMessage(chatId, text);
-            logger.write(`Mensaje enviado correctamente: ${number}\n`);
-        },1000);//delay para evitar mandar el mensaje al mismo tiempo
+            logger.write(`Message sent to : ${number}\n`);
+        },1000);// Delay of 10 seconds
     }); 
 
 client.on('message', async msg => {
     if (msg.body === '!info') {
-        msg.reply('Este es un programa hecho en Javascript');
+        msg.reply('This is a program made in Javascript');
         const nameChat=(await msg.getChat()).name;
-        console.log(`El usuario: ${nameChat} ha solicitado más información`);
+        console.log(`The user: ${nameChat} wants more information`);
     } 
     
-    else if (msg.body === '!hola') {
-        client.sendMessage(msg.from, 'Hola te habla un bot');
+    else if (msg.body === '!hello') {
+        client.sendMessage(msg.from, 'Hello you are talking to a chatbot');
         const nameChat=(await msg.getChat()).name;
-        console.log(`El usuario: ${nameChat} ha mandado hola`);
+        console.log(`The user: ${nameChat} said hello`);
     }
 });
 
 client.on('disconnected', (reason) => {
-    console.log('El número registrado para mandar mensajes se ha desconectado, favor de cerrar el ejecutable y volver a escanear el código QR', reason);
+    console.log('The user has disconneted the session', reason);
 });
 
 
